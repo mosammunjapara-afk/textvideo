@@ -728,8 +728,36 @@ def list_tasks():
 
 @app.get("/", response_class=HTMLResponse)
 def frontend():
-    with open("templates/index.html", "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    template_file = Path("templates/index.html")
+
+    if not template_file.exists():
+        return HTMLResponse("""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Caryanams API</title>
+            <style>
+                body{
+                    font-family:Arial,sans-serif;
+                    text-align:center;
+                    padding:80px;
+                    background:linear-gradient(135deg,#0f172a,#1e293b);
+                    color:white;
+                }
+                h1{font-size:3rem;margin-bottom:20px;}
+                p{font-size:1.2rem;color:#cbd5e1;}
+            </style>
+        </head>
+        <body>
+            <h1>🚀 Caryanams API Running</h1>
+            <p>Your Render deployment is successful.</p>
+        </body>
+        </html>
+        """)
+
+    return HTMLResponse(
+        content=template_file.read_text(encoding="utf-8")
+    )
 
 if __name__ == "__main__":
     import uvicorn
