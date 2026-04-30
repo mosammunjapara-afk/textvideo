@@ -4,3 +4,4 @@ gunicorn
 python-multipart
 httpx
 magic-hour
+aiofiles
