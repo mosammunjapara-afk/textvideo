@@ -222,6 +222,23 @@ input[type=range].vs::-webkit-slider-thumb{background:var(--gold);box-shadow:0 0
 .mrn{font-size:13px;color:var(--text)}
 #music-player{width:100%;margin-top:4px}
 @media (max-width: 780px) {
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+    max-width: 100%;
+  }
+
+  .app {
+    display: block;
+    width: 100%;
+    overflow-x: hidden;
+  }
+
   .sidebar {
     display: block;
     width: 100%;
@@ -231,10 +248,12 @@ input[type=range].vs::-webkit-slider-thumb{background:var(--gold);box-shadow:0 0
     border-bottom: 1px solid var(--border);
     padding: 18px 15px;
     background: rgba(255,255,255,.98);
+    overflow-x: hidden;
   }
 
   .logo {
     margin-bottom: 20px;
+    text-align: center;
   }
 
   nav {
@@ -242,13 +261,15 @@ input[type=range].vs::-webkit-slider-thumb{background:var(--gold);box-shadow:0 0
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     margin-bottom: 0;
+    width: 100%;
   }
 
   .nb {
     width: 100%;
+    min-width: 0;
     justify-content: center;
     text-align: center;
-    padding: 14px 12px;
+    padding: 14px 10px;
     font-size: 13px;
   }
 
@@ -263,20 +284,49 @@ input[type=range].vs::-webkit-slider-thumb{background:var(--gold);box-shadow:0 0
 
   .main {
     width: 100%;
+    margin-left: 0;
+    overflow-x: hidden;
   }
 
+  .topbar,
   .content {
-    padding: 20px 16px;
+    width: 100%;
+    padding: 15px;
+    overflow-x: hidden;
   }
 
-  .topbar {
-    padding: 15px 16px;
+  .hero,
+  .panel,
+  .upload-box,
+  .result-card,
+  .card,
+  .grid {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  img,
+  video,
+  iframe {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  textarea,
+  input,
+  select,
+  button {
+    width: 100%;
+    max-width: 100%;
   }
 
   .tt {
     font-size: 12px;
     text-align: center;
     width: 100%;
+    word-break: break-word;
   }
 }
 </style>
