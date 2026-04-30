@@ -221,7 +221,64 @@ input[type=range].vs::-webkit-slider-thumb{background:var(--gold);box-shadow:0 0
 .mrl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
 .mrn{font-size:13px;color:var(--text)}
 #music-player{width:100%;margin-top:4px}
-@media(max-width:780px){.sidebar{display:none}.content{padding:20px}.topbar{padding:15px 20px}}
+@media (max-width: 780px) {
+  .sidebar {
+    display: block;
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 18px 15px;
+    background: rgba(255,255,255,.98);
+  }
+
+  .logo {
+    margin-bottom: 20px;
+  }
+
+  nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 0;
+  }
+
+  .nb {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 14px 12px;
+    font-size: 13px;
+  }
+
+  .nb svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  .sb-bot {
+    display: none;
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .content {
+    padding: 20px 16px;
+  }
+
+  .topbar {
+    padding: 15px 16px;
+  }
+
+  .tt {
+    font-size: 12px;
+    text-align: center;
+    width: 100%;
+  }
+}
 </style>
 </head>
 <body>
