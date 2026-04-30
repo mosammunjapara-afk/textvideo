@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Caryanams — AI Video Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f6fa;--card:#ffffff;--border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.13);
+  --accent:#4f8eff;--accent2:#a855f7;--gold:#f59e0b;--red:#ef4444;--green:#16a34a;
+  --text:#111827;--text2:#4b5563;--text3:#9ca3af;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+.amb{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 900px 600px at -5% -15%,rgba(79,142,255,.05),transparent),
+    radial-gradient(ellipse 700px 500px at 105% 105%,rgba(168,85,247,.05),transparent)}
+.grain{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.4'/%3E%3C/svg%3E");
+  background-size:180px}
+.app{display:flex;min-height:100vh;position:relative;z-index:2}
+
+/* SIDEBAR */
+.sidebar{width:252px;flex-shrink:0;background:rgba(255,255,255,.97);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;padding:26px 17px;backdrop-filter:blur(40px);
+  position:sticky;top:0;height:100vh}
+.logo{display:flex;align-items:center;gap:11px;margin-bottom:42px;padding:0 3px}
+.lm{width:38px;height:38px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+  box-shadow:0 0 28px rgba(79,142,255,.3)}
+.ln{font-family:'Syne',sans-serif;font-size:21px;font-weight:800;
+  background:linear-gradient(90deg,#111827,rgba(17,24,39,.65));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.lt{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-top:1px}
+.nl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--text3);text-transform:uppercase;margin-bottom:7px;padding:0 3px}
+nav{display:flex;flex-direction:column;gap:3px;margin-bottom:30px}
+.nb{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:11px;
+  cursor:pointer;transition:all .2s;color:var(--text2);font-size:13.5px;font-weight:500;
+  border:none;background:none;width:100%;text-align:left}
+.nb svg{width:15px;height:15px;flex-shrink:0;opacity:.5;transition:.2s}
+.nb:hover{background:rgba(0,0,0,.04);color:var(--text)}
+.nb.active{background:linear-gradient(135deg,rgba(79,142,255,.1),rgba(168,85,247,.07));
+  color:var(--text);border:1px solid rgba(79,142,255,.25)}
+.nb.active svg{opacity:1}
+.sb-bot{margin-top:auto}
+.ac{background:rgba(0,0,0,.025);border:1px solid var(--border);border-radius:12px;padding:12px 13px}
+.ar{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.ar:last-child{margin-bottom:0}
+.ap{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ap.on{background:var(--green);box-shadow:0 0 7px rgba(34,197,94,.5)}
+.ap.sb{background:var(--gold);box-shadow:0 0 7px rgba(245,158,11,.4)}
+.an{font-size:11px;color:var(--text2);font-family:'JetBrains Mono',monospace}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{padding:19px 34px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between}
+.tt{font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:var(--text2)}
+.lp{display:flex;align-items:center;gap:7px;background:rgba(34,197,94,.08);
+  border:1px solid rgba(34,197,94,.2);border-radius:100px;padding:5px 13px;
+  font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:1.5px;
+  color:var(--green);text-transform:uppercase}
+.ld{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:38px 34px}
+.content::-webkit-scrollbar{width:3px}
+.content::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:4px}
+.panel{display:none;animation:up .35s ease}
+.panel.active{display:block}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEAD */
+.sh{margin-bottom:30px}
+.sh h2{font-family:'Syne',sans-serif;font-size:27px;font-weight:800;
+  background:linear-gradient(135deg,var(--text) 40%,var(--text2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px}
+.sh p{font-size:13px;color:var(--text2);line-height:1.65;font-weight:300}
+.fl{font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:2px;
+  text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:block}
+
+/* TEXTAREA */
+.pw{position:relative;margin-bottom:21px}
+textarea{width:100%;background:var(--card);border:1px solid var(--border);border-radius:14px;
+  color:var(--text);font-family:'Inter',sans-serif;font-size:14px;font-weight:300;
+  line-height:1.7;padding:15px 17px;resize:vertical;min-height:108px;outline:none;
+  transition:border-color .2s,box-shadow .2s}
+textarea::placeholder{color:var(--text3)}
+textarea:focus{border-color:rgba(79,142,255,.4);box-shadow:0 0 0 3px rgba(79,142,255,.07)}
+
+/* SUGGESTIONS */
+.sug{display:none;position:absolute;left:0;right:0;top:calc(100% + 6px);
+  background:#ffffff;border:1px solid rgba(79,142,255,.22);border-radius:13px;
+  overflow:hidden;z-index:200;box-shadow:0 8px 32px rgba(0,0,0,.12)}
+.si{display:flex;align-items:flex-start;gap:10px;padding:12px 15px;
+  cursor:pointer;border-bottom:1px solid rgba(0,0,0,.05);transition:background .15s}
+.si:last-child{border-bottom:none}
+.si:hover{background:rgba(79,142,255,.09)}
+.sic{font-size:12px;margin-top:2px;flex-shrink:0;opacity:.45}
+.stx{font-size:13px;color:var(--text);line-height:1.5;font-weight:300}
+.sld{display:flex;align-items:center;gap:6px;padding:13px 15px;
+  color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace}
+.sd{width:4px;height:4px;border-radius:50%;background:var(--accent);animation:sb 1.2s ease infinite}
+.sd:nth-child(2){animation-delay:.15s}.sd:nth-child(3){animation-delay:.3s}
+@keyframes sb{0%,60%,100%{transform:translateY(0);opacity:.3}30%{transform:translateY(-5px);opacity:1}}
+
+/* DURATION */
+.dur{margin-bottom:21px}
+.dr{display:flex;align-items:center;gap:14px;margin-top:10px}
+input[type=range]{flex:1;-webkit-appearance:none;height:3px;border-radius:4px;
+  background:rgba(0,0,0,.1);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;
+  border-radius:50%;background:var(--accent);cursor:pointer;
+  box-shadow:0 0 12px rgba(79,142,255,.5);transition:transform .2s}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.25)}
+.dv{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:500;
+  color:var(--accent);min-width:50px;text-align:right}
+
+/* IMAGE DROP */
+.idrop{border:2px dashed var(--border);border-radius:16px;padding:46px 20px;text-align:center;
+  cursor:pointer;transition:all .25s;position:relative;overflow:hidden;margin-bottom:21px;
+  background:linear-gradient(135deg,rgba(79,142,255,.02),rgba(168,85,247,.02))}
+.idrop:hover,.idrop.drag{border-color:var(--accent);background:rgba(79,142,255,.05)}
+.idrop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dico{width:54px;height:54px;margin:0 auto 14px;border-radius:14px;
+  background:rgba(79,142,255,.1);border:1px solid rgba(79,142,255,.2);
+  display:flex;align-items:center;justify-content:center;font-size:22px}
+.dtx{font-size:13px;color:var(--text2);line-height:1.7}
+.dtx b{color:var(--accent);cursor:pointer;font-weight:500}
+.dtx small{font-size:10.5px;color:var(--text3);display:block;margin-top:3px;font-family:'JetBrains Mono',monospace;letter-spacing:.5px}
+#preview-img{display:none;max-width:100%;max-height:200px;border-radius:10px;margin:0 auto;object-fit:contain}
+
+/* MUSIC */
+.mc{background:rgba(0,0,0,.02);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:21px}
+.mh{display:flex;align-items:center;gap:12px;padding:14px 17px;cursor:pointer;transition:background .2s;user-select:none}
+.mh:hover{background:rgba(0,0,0,.02)}
+.mic{width:34px;height:34px;border-radius:9px;flex-shrink:0;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);display:flex;align-items:center;justify-content:center;font-size:15px}
+.mi{flex:1}
+.mi strong{display:block;font-size:13px;font-weight:500}
+.mi small{font-size:10.5px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.mbg{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 10px;border-radius:100px;background:rgba(0,0,0,.04);
+  color:var(--text3);border:1px solid var(--border);transition:all .25s}
+.mbg.on{background:rgba(245,158,11,.1);color:var(--gold);border-color:rgba(245,158,11,.25)}
+.chev{color:var(--text3);font-size:10px;transition:transform .3s;margin-left:4px}
+.chev.open{transform:rotate(180deg)}
+.mbdy{display:none;border-top:1px solid var(--border)}
+.mbdy.open{display:block}
+.mts{display:flex;gap:5px;padding:11px 15px;background:rgba(0,0,0,.03)}
+.mt{flex:1;background:none;border:1px solid var(--border);color:var(--text3);border-radius:10px;padding:9px 6px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
+.mt.active{background:rgba(79,142,255,.1);border-color:rgba(79,142,255,.3);color:var(--accent)}
+.mp{display:none;padding:13px 15px}
+.mp.active{display:block}
+.mdi{background:rgba(79,142,255,.05);border:1px solid rgba(79,142,255,.12);border-radius:10px;padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:12px}
+.mdi strong{color:var(--accent)}
+.mdr{border:2px dashed var(--border);border-radius:12px;padding:17px;text-align:center;cursor:pointer;transition:all .2s;position:relative;margin-bottom:9px}
+.mdr:hover{border-color:var(--gold);background:rgba(245,158,11,.03)}
+.mdr input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.mdt{font-size:12px;color:var(--text2);line-height:1.5}
+.mdt b{color:var(--gold)}
+.mfi{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--green);padding:4px 0}
+.nmn{font-size:12px;color:var(--text3);line-height:1.6;font-weight:300}
+.vr{display:flex;align-items:center;gap:10px;margin-top:10px}
+input[type=range].vs::-webkit-slider-thumb{background:var(--gold);box-shadow:0 0 10px rgba(245,158,11,.4)}
+.vv{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--gold);min-width:36px;text-align:right}
+
+/* BUTTON */
+.btn-gen{width:100%;padding:16px 20px;background:linear-gradient(135deg,var(--accent),var(--accent2));
+  border:none;border-radius:14px;color:#fff;font-family:'Syne',sans-serif;font-size:16px;
+  font-weight:700;letter-spacing:.8px;cursor:pointer;position:relative;overflow:hidden;
+  transition:all .3s;box-shadow:0 4px 32px rgba(79,142,255,.22),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn-gen::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.13),transparent 50%);opacity:0;transition:opacity .3s}
+.btn-gen:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(79,142,255,.32)}
+.btn-gen:hover::after{opacity:1}
+.btn-gen:active{transform:translateY(0)}
+.btn-gen:disabled{background:rgba(0,0,0,.07);color:var(--text3);cursor:not-allowed;transform:none;box-shadow:none}
+
+/* STATUS */
+#status-box{display:none;margin-top:26px;background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;animation:up .4s ease;box-shadow:0 2px 16px rgba(0,0,0,.07)}
+#status-box.show{display:block}
+.shead{display:flex;align-items:center;justify-content:space-between;padding:15px 21px;border-bottom:1px solid var(--border)}
+.sl{display:flex;align-items:center;gap:10px}
+.sdot{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:sp 1.5s ease infinite;flex-shrink:0}
+.sdot.done{background:var(--green);animation:none}
+.sdot.err{background:var(--red);animation:none}
+@keyframes sp{0%,100%{box-shadow:0 0 0 0 rgba(79,142,255,.4)}50%{box-shadow:0 0 0 8px rgba(79,142,255,0)}}
+#status-text{font-size:14px;font-weight:500}
+.mtg{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3)}
+.ptr{height:2px;background:rgba(0,0,0,.06)}
+.pb{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:width .5s}
+.pb.run{width:35%;animation:pgr 2s ease-in-out infinite}
+@keyframes pgr{0%{transform:translateX(-150%)}100%{transform:translateX(350%)}}
+.steps-row{display:flex;align-items:center;padding:13px 21px;flex-wrap:wrap}
+.step{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);padding-right:14px;position:relative}
+.step:not(:last-child)::after{content:'›';position:absolute;right:3px;opacity:.25}
+.spp{width:5px;height:5px;border-radius:50%;background:rgba(0,0,0,.1)}
+.step.go .spp{background:var(--accent);box-shadow:0 0 6px rgba(79,142,255,.6)}.step.go{color:var(--accent)}
+.step.ok .spp{background:var(--green)}.step.ok{color:var(--green)}
+.errmsg{display:none;margin:0 21px 20px;background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:12px 14px;font-size:12px;color:#dc2626;line-height:1.6;font-family:'JetBrains Mono',monospace}
+.errmsg.show{display:block}
+#video-result{display:none;padding:19px 21px 22px;border-top:1px solid var(--border);animation:up .5s ease}
+#video-result.show{display:block}
+.rl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.rl::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green);display:block}
+#vid-player{width:100%;border-radius:12px;background:#000;outline:none;margin-bottom:14px;box-shadow:0 4px 20px rgba(0,0,0,.15)}
+.ract{display:flex;gap:10px;flex-wrap:wrap}
+.btn-dl{display:flex;align-items:center;gap:8px;flex:1;justify-content:center;padding:12px 20px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;letter-spacing:.4px;box-shadow:0 4px 20px rgba(79,142,255,.2)}
+.btn-dl:hover{transform:translateY(-1px);box-shadow:0 6px 26px rgba(79,142,255,.3)}
+.btn-nw{display:flex;align-items:center;gap:7px;padding:12px 20px;border-radius:12px;background:rgba(0,0,0,.04);color:var(--text);border:1px solid var(--border);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s}
+.btn-nw:hover{background:rgba(0,0,0,.07);border-color:var(--border2)}
+.mres{display:none;margin-top:14px;background:rgba(245,158,11,.05);border:1px solid rgba(245,158,11,.15);border-radius:12px;padding:14px 16px}
+.mres.show{display:flex;flex-direction:column;gap:8px}
+.mrl{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold)}
+.mrn{font-size:13px;color:var(--text)}
+#music-player{width:100%;margin-top:4px}
+@media(max-width:780px){.sidebar{display:none}.content{padding:20px}.topbar{padding:15px 20px}}
+</style>
+</head>
+<body>
+<div class="amb"></div><div class="grain"></div>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="logo">
+      <div class="lm">⚡</div>
+      <div><div class="ln">Caryanams</div><div class="lt">AI VIDEO STUDIO</div></div>
+    </div>
+    <div class="nl">Generate</div>
+    <nav>
+      <button class="nb active" id="tab-t2v" onclick="switchTab('t2v',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>Text to Video
+      </button>
+      <button class="nb" id="tab-i2v" onclick="switchTab('i2v',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-5-5L5 21"/></svg>Image to Video
+      </button>
+    </nav>
+    
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <span class="tt">Caryanams — AI Video Generation Studio</span>
+      
+    </div>
+    <div class="content">
+
+      <!-- TEXT TO VIDEO -->
+      <div class="panel active" id="panel-t2v">
+        <div class="sh"><h2>Text → Video</h2><p>Describe your scene in detail. The more vivid, the better the result.</p></div>
+        <span class="fl">✦ Scene description</span>
+        <div class="pw">
+          <textarea id="t2v-prompt" placeholder="e.g. A sleek black supercar drifting through rain-soaked neon city streets at midnight, cinematic slow motion, 4K..."
+            oninput="onPromptInput(this,'t2v-sug')" onblur="hideSuggestions('t2v-sug')" onfocus="onPromptInput(this,'t2v-sug')"></textarea>
+          <div class="sug" id="t2v-sug"></div>
+        </div>
+        <div class="dur"><span class="fl">⏱ Duration</span>
+          <div class="dr">
+            <input type="range" id="t2v-dur" min="2" max="8" value="5" oninput="document.getElementById('t2v-dur-val').textContent=this.value;updateSlider(this)">
+            <div class="dv"><span id="t2v-dur-val">5</span>s</div>
+          </div></div>
+        <div class="mc">
+          <div class="mh" onclick="toggleMusic('t2v')">
+            <div class="mic">🎵</div>
+            <div class="mi"><strong>Background Music</strong><small id="t2v-music-sub">None selected</small></div>
+            <span class="mbg" id="t2v-music-badge">NONE</span><span class="chev" id="t2v-music-chevron">▼</span>
+          </div>
+          <div class="mbdy" id="t2v-music-body">
+            <div class="mts">
+              <button class="mt active" onclick="setMusicMode('t2v','none',this)">🚫 None</button>
+              <button class="mt" onclick="setMusicMode('t2v','static',this)">📁 Upload</button>
+              <button class="mt" onclick="setMusicMode('t2v','dynamic',this)">🤖 AI Music</button>
+            </div>
+            <div class="mp active" id="t2v-panel-none"><p class="nmn">Video will be generated without background music.</p></div>
+            <div class="mp" id="t2v-panel-static">
+              <div class="mdr"><input type="file" id="t2v-music-file" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg" onchange="handleMusicUpload(this,'t2v')"/>
+                <div style="font-size:22px;margin-bottom:8px">🎧</div>
+                <div class="mdt">Drop MP3/WAV here or <b>browse</b><br><small>Max 20MB</small></div></div>
+              <div class="mfi" id="t2v-music-info"></div>
+              <span class="fl" style="margin-top:10px">Volume</span>
+              <div class="vr"><input type="range" class="vs" id="t2v-vol" min="0.1" max="1.5" step="0.1" value="0.8" oninput="document.getElementById('t2v-vol-val').textContent=Math.round(this.value*100)+'%'"><div class="vv"><span id="t2v-vol-val">80%</span></div></div>
+            </div>
+            <div class="mp" id="t2v-panel-dynamic">
+              <div class="mdi"><strong>🎼 AI Music</strong> — Detects your prompt's mood and picks matching background music automatically.</div>
+              <span class="fl">Volume</span>
+              <div class="vr"><input type="range" class="vs" id="t2v-vol-dyn" min="0.1" max="1.5" step="0.1" value="0.8" oninput="document.getElementById('t2v-vol-dyn-val').textContent=Math.round(this.value*100)+'%'"><div class="vv"><span id="t2v-vol-dyn-val">80%</span></div></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-gen" id="gen-btn-t2v" onclick="generateT2V()">⚡ Generate Video</button>
+
+        <div id="status-box">
+          <div class="shead"><div class="sl"><div class="sdot" id="status-dot"></div><span id="status-text">Processing…</span></div><span class="mtg" id="model-tag"></span></div>
+          <div class="ptr"><div class="pb run" id="prog-bar"></div></div>
+          <div class="steps-row">
+            <div class="step go" id="step-q"><div class="spp"></div>Queue</div>
+            <div class="step" id="step-r"><div class="spp"></div>Render</div>
+            <div class="step" id="step-m"><div class="spp"></div>Music</div>
+            <div class="step" id="step-d"><div class="spp"></div>Done</div>
+          </div>
+          <div class="errmsg" id="error-box"></div>
+          <div id="video-result">
+            <div class="rl">Video ready</div>
+            <video id="vid-player" controls playsinline></video>
+            <div class="mres" id="music-result">
+              <div class="mrl">🎵 Background music</div>
+              <div class="mrn" id="music-result-name"></div>
+              <audio id="music-player" controls></audio>
+            </div>
+            <div class="ract">
+              <a class="btn-dl" id="download-btn" href="#" download>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Video
+              </a>
+              <button class="btn-nw" onclick="resetUI()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.65"/></svg>New
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- IMAGE TO VIDEO -->
+      <div class="panel" id="panel-i2v">
+        <div class="sh"><h2>Image → Video</h2><p>Upload any image and bring it to life with cinematic AI motion.</p></div>
+        <span class="fl">🖼 Upload image</span>
+        <div class="idrop" id="drop-zone" ondragover="this.classList.add('drag');event.preventDefault()" ondragleave="this.classList.remove('drag')" ondrop="this.classList.remove('drag')">
+          <input type="file" id="i2v-file" accept="image/jpeg,image/png,image/webp" onchange="previewImage(this)"/>
+          <div class="dico" id="drop-icon">🖼</div>
+          <div class="dtx" id="drop-txt">Drop image here or <b>browse</b><small>JPG · PNG · WEBP · max 10MB</small></div>
+          <img id="preview-img" alt="preview"/>
+        </div>
+        <span class="fl">✦ Motion prompt (optional)</span>
+        <div class="pw" style="margin-bottom:21px">
+          <textarea id="i2v-prompt" placeholder="e.g. Camera slowly pulls back, smoke rises from the hood, cinematic depth of field..." style="min-height:80px"
+            oninput="onPromptInput(this,'i2v-sug')" onblur="hideSuggestions('i2v-sug')" onfocus="onPromptInput(this,'i2v-sug')"></textarea>
+          <div class="sug" id="i2v-sug"></div>
+        </div>
+        <div class="dur"><span class="fl">⏱ Duration</span>
+          <div class="dr">
+            <input type="range" id="i2v-dur" min="2" max="8" value="5" oninput="document.getElementById('i2v-dur-val').textContent=this.value;updateSlider(this)">
+            <div class="dv"><span id="i2v-dur-val">5</span>s</div>
+          </div></div>
+        <div class="mc">
+          <div class="mh" onclick="toggleMusic('i2v')">
+            <div class="mic">🎵</div>
+            <div class="mi"><strong>Background Music</strong><small id="i2v-music-sub">None selected</small></div>
+            <span class="mbg" id="i2v-music-badge">NONE</span><span class="chev" id="i2v-music-chevron">▼</span>
+          </div>
+          <div class="mbdy" id="i2v-music-body">
+            <div class="mts">
+              <button class="mt active" onclick="setMusicMode('i2v','none',this)">🚫 None</button>
+              <button class="mt" onclick="setMusicMode('i2v','static',this)">📁 Upload</button>
+              <button class="mt" onclick="setMusicMode('i2v','dynamic',this)">🤖 AI Music</button>
+            </div>
+            <div class="mp active" id="i2v-panel-none"><p class="nmn">Video will be generated without background music.</p></div>
+            <div class="mp" id="i2v-panel-static">
+              <div class="mdr"><input type="file" id="i2v-music-file" accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg" onchange="handleMusicUpload(this,'i2v')"/>
+                <div style="font-size:22px;margin-bottom:8px">🎧</div>
+                <div class="mdt">Drop MP3/WAV here or <b>browse</b><br><small>Max 20MB</small></div></div>
+              <div class="mfi" id="i2v-music-info"></div>
+              <span class="fl" style="margin-top:10px">Volume</span>
+              <div class="vr"><input type="range" class="vs" id="i2v-vol" min="0.1" max="1.5" step="0.1" value="0.8" oninput="document.getElementById('i2v-vol-val').textContent=Math.round(this.value*100)+'%'"><div class="vv"><span id="i2v-vol-val">80%</span></div></div>
+            </div>
+            <div class="mp" id="i2v-panel-dynamic">
+              <div class="mdi"><strong>🎼 AI Music</strong> — Detects mood and generates matching background music automatically.</div>
+              <span class="fl">Volume</span>
+              <div class="vr"><input type="range" class="vs" id="i2v-vol-dyn" min="0.1" max="1.5" step="0.1" value="0.8" oninput="document.getElementById('i2v-vol-dyn-val').textContent=Math.round(this.value*100)+'%'"><div class="vv"><span id="i2v-vol-dyn-val">80%</span></div></div>
+            </div>
+          </div>
+        </div>
+        <button class="btn-gen" id="gen-btn-i2v" onclick="generateI2V()">⚡ Animate Image</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const musicState={t2v:{mode:'none',filePath:null},i2v:{mode:'none',filePath:null}};
+let pollInterval=null,suggTimeout=null,lastSuggText='';
+
+function switchTab(name,btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+name).classList.add('active');
+  btn.classList.add('active');resetUI();
+}
+function updateSlider(el){
+  const p=(el.value-el.min)/(el.max-el.min)*100;
+  el.style.background=`linear-gradient(90deg,var(--accent) ${p}%,rgba(255,255,255,.08) ${p}%)`;
+}
+document.querySelectorAll('input[type=range]').forEach(r=>updateSlider(r));
+
+function previewImage(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const img=document.getElementById('preview-img');
+    img.src=e.target.result;img.style.display='block';
+    document.getElementById('drop-icon').style.display='none';
+    document.getElementById('drop-txt').style.display='none';
+  };reader.readAsDataURL(file);
+}
+function resetUI(){
+  clearInterval(pollInterval);
+  const sb=document.getElementById('status-box');if(sb)sb.classList.remove('show');
+  const vr=document.getElementById('video-result');if(vr)vr.classList.remove('show');
+  const em=document.getElementById('error-box');if(em)em.classList.remove('show');
+  const dot=document.getElementById('status-dot');if(dot)dot.className='sdot';
+  const pb=document.getElementById('prog-bar');if(pb){pb.className='pb run';pb.style.cssText='';}
+  const mt=document.getElementById('model-tag');if(mt)mt.textContent='';
+  document.querySelectorAll('.step').forEach((s,i)=>{s.className='step'+(i===0?' go':'')});
+  document.querySelectorAll('.btn-gen').forEach(b=>b.disabled=false);
+}
+function showStatus(txt,state='processing'){
+  const sb=document.getElementById('status-box');if(sb)sb.classList.add('show');
+  const st=document.getElementById('status-text');if(st)st.textContent=txt;
+  const dot=document.getElementById('status-dot');
+  if(dot)dot.className='sdot'+(state==='done'?' done':state==='error'?' err':'');
+}
+function setStep(s){
+  const m={q:0,r:1,m:2,d:3},keys=['q','r','m','d'],i=m[s]??0;
+  keys.forEach((k,j)=>{const el=document.getElementById('step-'+k);if(el)el.className='step'+(j<i?' ok':j===i?' go':'')});
+}
+function showError(msg){
+  const em=document.getElementById('error-box');if(em){em.textContent='❌ '+msg;em.classList.add('show');}
+  showStatus('Generation failed','error');
+  const pb=document.getElementById('prog-bar');if(pb){pb.className='pb';pb.style.width='100%';pb.style.background='var(--red)';}
+  document.querySelectorAll('.btn-gen').forEach(b=>b.disabled=false);
+}
+function startPolling(taskId){
+  pollInterval=setInterval(async()=>{
+    try{
+      const res=await fetch('/status/'+taskId);const data=await res.json();
+      const mt=document.getElementById('model-tag');if(data.model_used&&mt)mt.textContent='⚡ '+data.model_used;
+      const st=data.status;
+      if(st==='processing'){showStatus('Rendering your video…');setStep('r')}
+      else if(st==='switching_to_wavespeed'){showStatus('Switching to WaveSpeed.ai…');setStep('r')}
+      else if(st==='switching_to_imagineart'){showStatus('Switching to imagine.art…');setStep('r')}
+      else if(st==='detecting_mood'){showStatus('Detecting music mood…');setStep('m')}
+      else if(st==='fetching_music'){showStatus('Fetching AI music…');setStep('m')}
+      else if(st==='mixing_audio'){showStatus('Mixing audio…');setStep('m')}
+      else if(st==='done'){
+        clearInterval(pollInterval);setStep('d');
+        const pb=document.getElementById('prog-bar');if(pb){pb.className='pb';pb.style.width='100%';}
+        showStatus('Video ready!','done');showVideo(data);
+        document.querySelectorAll('.btn-gen').forEach(b=>b.disabled=false);
+      }else if(st==='failed'){clearInterval(pollInterval);showError(data.error||'Generation failed')}
+    }catch(e){console.error(e)}
+  },3000);
+}
+function showVideo(data){
+  const vr=document.getElementById('video-result');if(vr)vr.classList.add('show');
+  const vp=document.getElementById('vid-player');if(vp){vp.src=data.download_url;vp.load();vp.play();}
+  const dl=document.getElementById('download-btn');if(dl){dl.href=data.download_url;dl.download=data.filename||'neurovid.mp4';}
+  if(data.audio_url){
+    const mr=document.getElementById('music-result');if(mr)mr.classList.add('show');
+    const mn=document.getElementById('music-result-name');if(mn)mn.textContent=data.music_info||'AI Generated Music';
+    const mp=document.getElementById('music-player');if(mp)mp.src=data.audio_url;
+  }
+}
+async function generateT2V(){
+  const prompt=document.getElementById('t2v-prompt').value.trim();
+  if(!prompt){alert('Please enter a prompt');return}
+  resetUI();document.getElementById('gen-btn-t2v').disabled=true;
+  showStatus('Submitting to AI engine…');setStep('q');
+  const mp=getMusicParams('t2v');const fd=new FormData();
+  fd.append('prompt',prompt);fd.append('duration',document.getElementById('t2v-dur').value);
+  fd.append('music_mode',mp.mode);if(mp.filePath)fd.append('music_path',mp.filePath);
+  fd.append('music_volume',mp.volume);
+  try{
+    const res=await fetch('/text-to-video',{method:'POST',body:fd});
+    const data=await res.json();if(!res.ok){showError(data.detail||'Error');return}
+    startPolling(data.task_id);
+  }catch(e){showError(e.message)}
+}
+async function generateI2V(){
+  const file=document.getElementById('i2v-file').files[0];
+  if(!file){alert('Please upload an image');return}
+  resetUI();document.getElementById('gen-btn-i2v').disabled=true;
+  showStatus('Uploading image…');setStep('q');
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const b64=e.target.result.split(',')[1];const mp=getMusicParams('i2v');const fd=new FormData();
+    fd.append('image_base64',b64);fd.append('prompt',document.getElementById('i2v-prompt').value.trim());
+    fd.append('duration',document.getElementById('i2v-dur').value);
+    fd.append('music_mode',mp.mode);if(mp.filePath)fd.append('music_path',mp.filePath);
+    fd.append('music_volume',mp.volume);
+    try{
+      showStatus('Submitting to AI engine…');
+      const res=await fetch('/image-to-video',{method:'POST',body:fd});
+      const data=await res.json();if(!res.ok){showError(data.detail||'Error');return}
+      startPolling(data.task_id);
+    }catch(e){showError(e.message)}
+  };reader.readAsDataURL(file);
+}
+function toggleMusic(tab){
+  document.getElementById(tab+'-music-body').classList.toggle('open');
+  document.getElementById(tab+'-music-chevron').classList.toggle('open');
+}
+function setMusicMode(tab,mode,btn){
+  musicState[tab].mode=mode;
+  btn.closest('.mts').querySelectorAll('.mt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  ['none','static','dynamic'].forEach(m=>{const p=document.getElementById(tab+'-panel-'+m);if(p)p.classList.toggle('active',m===mode)});
+  const badge=document.getElementById(tab+'-music-badge');
+  const sub=document.getElementById(tab+'-music-sub');
+  const L={none:['NONE','None selected'],static:['UPLOAD','Custom music'],dynamic:['AI','Auto-generated']};
+  badge.textContent=L[mode][0];badge.className='mbg'+(mode!=='none'?' on':'');sub.textContent=L[mode][1];
+}
+async function handleMusicUpload(input,tab){
+  const file=input.files[0];if(!file)return;const fd=new FormData();fd.append('music',file);
+  try{
+    const resp=await fetch('/upload-music',{method:'POST',body:fd});const data=await resp.json();
+    if(resp.ok){musicState[tab].filePath=data.file_path;document.getElementById(tab+'-music-info').textContent='✓ '+file.name+' ('+(file.size/1024/1024).toFixed(1)+'MB)'}
+    else alert(data.detail||'Upload error');
+  }catch(e){alert('Upload error: '+e.message)}
+}
+function getMusicParams(tab){
+  const s=musicState[tab];let vol=0.8;
+  if(s.mode==='static')vol=parseFloat(document.getElementById(tab+'-vol').value);
+  if(s.mode==='dynamic')vol=parseFloat(document.getElementById(tab+'-vol-dyn').value);
+  return{mode:s.mode,filePath:s.filePath,volume:vol};
+}
+const toText=s=>typeof s==='string'?s:(s.text||s.prompt||s.suggestion||Object.values(s)[0]||'');
+function showSuggestions(id,list){
+  const box=document.getElementById(id);
+  if(!list||!list.length){box.style.display='none';return}
+  box.innerHTML=list.map(s=>{const t=toText(s);if(!t)return'';
+    return`<div class="si" onmousedown="selectSuggestion(event,'${id}')"><span class="sic">✨</span><span class="stx">${t}</span></div>`;
+  }).filter(Boolean).join('');box.style.display='block';
+}
+function showLoading(id){
+  const box=document.getElementById(id);
+  box.innerHTML=`<div class="sld"><span class="sd"></span><span class="sd"></span><span class="sd"></span><span style="margin-left:8px">Generating…</span></div>`;
+  box.style.display='block';
+}
+function hideSuggestions(id){setTimeout(()=>{const b=document.getElementById(id);if(b)b.style.display='none'},200)}
+function selectSuggestion(e,id){
+  e.preventDefault();const t=e.currentTarget.querySelector('.stx').textContent;
+  const box=document.getElementById(id);const ta=box.previousElementSibling;
+  ta.value=t;ta.focus();box.style.display='none';
+}
+async function fetchSuggestions(text){
+  try{
+    const r=await fetch('/suggest-prompts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    const d=await r.json();return d.suggestions||[];
+  }catch(e){return[]}
+}
+function onPromptInput(ta,id){
+  const text=ta.value.trim();if(text.length<2){hideSuggestions(id);return}
+  if(text===lastSuggText)return;lastSuggText=text;
+  clearTimeout(suggTimeout);showLoading(id);
+  suggTimeout=setTimeout(async()=>{showSuggestions(id,await fetchSuggestions(text))},600);
+}
+</script>
+</body>
+</html>
